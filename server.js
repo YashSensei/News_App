@@ -5,23 +5,16 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// Enable CORS with specific options
-app.use(cors({
-    origin: ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000'],
-    methods: ['GET', 'POST'],
-    credentials: true
-}));
+// Enable CORS
+app.use(cors());
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 // Cache for API responses
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-const TRENDING_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
-
 const cache = {
     categories: new Map(),
     trending: {
@@ -29,6 +22,9 @@ const cache = {
         timestamp: null
     }
 };
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const TRENDING_CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 
 // News API endpoint for latest news
 app.get('/api/news', async (req, res) => {
@@ -68,8 +64,6 @@ app.get('/api/news', async (req, res) => {
             });
         }
 
-        // Add cache control headers
-        res.set('Cache-Control', 'public, max-age=300');
         res.json(response.data);
     } catch (error) {
         console.error('Error details:', error.response?.data || error.message);
@@ -77,7 +71,37 @@ app.get('/api/news', async (req, res) => {
     }
 });
 
-// News API endpoint for search
+// Add trending news endpoint
+app.get('/api/news/trending', async (req, res) => {
+    try {
+        if (cache.trending.data && 
+            Date.now() - cache.trending.timestamp < TRENDING_CACHE_DURATION) {
+            return res.json({
+                status: 'success',
+                results: cache.trending.data
+            });
+        }
+
+        const apiKey = process.env.NEWS_API_KEY;
+        const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&language=en&country=in&category=top`;
+
+        const response = await axios.get(url);
+        
+        if (response.data.status === "success") {
+            cache.trending = {
+                data: response.data.results,
+                timestamp: Date.now()
+            };
+        }
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching trending:', error);
+        res.status(500).json({ error: 'Failed to fetch trending news' });
+    }
+});
+
+// Search endpoint
 app.get('/api/news/search', async (req, res) => {
     try {
         const { q, page } = req.query;
@@ -97,60 +121,13 @@ app.get('/api/news/search', async (req, res) => {
     }
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok' });
-});
-
-// Add trending news endpoint
-app.get('/api/news/trending', async (req, res) => {
-    try {
-        // Check cache
-        if (cache.trending.data && 
-            Date.now() - cache.trending.timestamp < TRENDING_CACHE_DURATION) {
-            return res.json({
-                status: 'success',
-                results: cache.trending.data
-            });
-        }
-
-        const apiKey = process.env.NEWS_API_KEY;
-        const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&language=en&country=in&category=top`;
-
-        const response = await axios.get(url);
-        
-        if (response.data.status === "success") {
-            // Cache the trending news
-            cache.trending = {
-                data: response.data.results,
-                timestamp: Date.now()
-            };
-
-            res.json({
-                status: 'success',
-                results: response.data.results
-            });
-        } else {
-            res.status(400).json({ 
-                status: 'error',
-                message: 'Failed to fetch trending news'
-            });
-        }
-    } catch (error) {
-        console.error('Error fetching trending:', error);
-        res.status(500).json({ 
-            status: 'error',
-            message: 'Failed to fetch trending news',
-            error: error.message
-        });
-    }
-});
-
-// Catch-all route to serve index.html
+// Catch all routes to serve index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
-}); 
+});
+
+module.exports = app; 
