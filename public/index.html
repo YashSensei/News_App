@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern News App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'news-dark': '#121212',
+                        'news-card': '#1E1E1E',
+                        'news-accent': '#2563EB'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-news-dark text-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="fixed w-full top-0 z-50 bg-news-dark/95 backdrop-blur-sm border-b border-gray-800">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-news-accent cursor-pointer">NewsHub</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-800">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed w-full top-16 z-40 bg-news-card/95 backdrop-blur-sm">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                    <div class="flex space-x-2 sm:space-x-4">
+                        <button class="px-4 py-2 rounded-full bg-news-accent text-white hover:bg-blue-600 transition-colors whitespace-nowrap">Latest</button>
+                        <button class="px-4 py-2 rounded-full hover:bg-gray-800 transition-colors whitespace-nowrap">Business</button>
+                        <button class="px-4 py-2 rounded-full hover:bg-gray-800 transition-colors whitespace-nowrap">Technology</button>
+                        <button class="px-4 py-2 rounded-full hover:bg-gray-800 transition-colors whitespace-nowrap">Sports</button>
+                        <button class="px-4 py-2 rounded-full hover:bg-gray-800 transition-colors whitespace-nowrap">Entertainment</button>
+                    </div>
+                </div>
+                <div class="relative w-full sm:w-auto">
+                    <input type="search" 
+                           id="searchInput"
+                           placeholder="Search news..."
+                           class="w-full sm:w-64 px-4 py-2 bg-gray-800 rounded-full focus:outline-none focus:ring-2 focus:ring-news-accent">
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-36 pb-8">
+        <!-- Trending Section -->
+        <section id="trendingNews" class="mb-12 hidden">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <span class="text-news-accent mr-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </span>
+                Trending Now
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Trending cards will be inserted here -->
+            </div>
+        </section>
+
+        <!-- Regular News Grid -->
+        <div id="newsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- News cards will be inserted here -->
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="hidden flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-news-accent"></div>
+        </div>
+
+        <!-- Pagination -->
+        <div id="paginationContainer" class="mt-8">
+            <!-- Pagination controls will be inserted here -->
+        </div>
+    </main>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html> 
